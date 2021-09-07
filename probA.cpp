@@ -4,6 +4,9 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <iostream>
+
+using std::cout;
 
 #define PRODUCER_AMOUNT 5
 #define CONSUMER_AMOUNT 5
@@ -18,6 +21,8 @@ bool running = true;
 
 void* producer(void* args) {
     while (running) {
+      pthread_mutex_lock(&mutex);
+
       while (count == 9)
       {
         pthread_cond_wait(&spotsFree, &mutex);
@@ -29,10 +34,13 @@ void* producer(void* args) {
       count++;
 
       pthread_cond_signal(&foodAvailable);
-      pthread_mutex_unlock(&mutex);
+      std::cout << "Produced " << randomNumber << std::endl;
 
-      printf("Produced %d\n", randomNumber);
-      // sleep(1);
+      pthread_mutex_unlock(&mutex);
+      
+
+      // printf("Produced %d\n", randomNumber);
+      sleep(1);
     }
     return 0;
 }
@@ -51,9 +59,12 @@ void* consumer(void* args) {
 
 
         pthread_cond_signal(&spotsFree);
+        std::cout << "Consumed " << eating << std::endl;
+
         pthread_mutex_unlock(&mutex);
 
-        printf("Consumed %d\n", eating);
+
+        // printf(pthread_self() + "Consumed %d\n", eating);
         sleep(1);
     }
     return 0;
@@ -68,7 +79,7 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < PRODUCER_AMOUNT; i++)
     {
-      pthread_create(&producers[i], NULL, &producer, NULL);
+      pthread_create(&producers[i], NULL, &producer, (void *)&producers);
     }
     
     for (int i = 0; i < CONSUMER_AMOUNT; i++)
