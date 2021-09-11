@@ -4,6 +4,9 @@
 #include <iostream>
 using std::cerr;
 
+// main method to run the program
+// run Problem A if probA is parsed through the command line
+// run Problem D if probD is parsed through the command line
 int main(int argc, char* argv[])
 {
 
