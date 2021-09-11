@@ -1,7 +1,10 @@
-.default: all
+CC=g++
+CFLAGS=-I.
+DEPS = probA.h probD.h
+OBJ = simulation.cpp probA.cpp probD.cpp
 
-clean:
-	rm -rf probA *.o *.dSYM
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-probA: probA.cpp
-	g++ -g -Wall -o probA probA.cpp
+simulation: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)

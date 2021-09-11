@@ -8,22 +8,28 @@
 
 using std::cout;
 
+// PROBLEM A
+
 #define PRODUCER_AMOUNT 5
 #define CONSUMER_AMOUNT 5
+#define BUCKET_SIZE 10
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex;
 pthread_cond_t spotsFree = PTHREAD_COND_INITIALIZER; 
 pthread_cond_t foodAvailable = PTHREAD_COND_INITIALIZER;
 
-int bucket[10];
+int bucket[BUCKET_SIZE];
 int count = 0;
-bool running = true;
+int maximumIndex = BUCKET_SIZE - 1;
+int minimumIndex = 0;
+bool runningA = true;
+
 
 void* producer(void* args) {
-    while (running) {
+    while (runningA) {
       pthread_mutex_lock(&mutex);
 
-      while (count == 9)
+      while (count == maximumIndex)
       {
         pthread_cond_wait(&spotsFree, &mutex);
       }
@@ -37,19 +43,17 @@ void* producer(void* args) {
       std::cout << "Produced " << randomNumber << std::endl;
 
       pthread_mutex_unlock(&mutex);
-      
-
-      // printf("Produced %d\n", randomNumber);
       sleep(1);
     }
     return 0;
 }
 
 void* consumer(void* args) {
-    while (running) {
+    while (runningA) {
+        
         pthread_mutex_lock(&mutex);
  
-        while (count == 0)
+        while (count == minimumIndex)
         {
           pthread_cond_wait(&foodAvailable, &mutex);
         }
@@ -62,20 +66,17 @@ void* consumer(void* args) {
         std::cout << "Consumed " << eating << std::endl;
 
         pthread_mutex_unlock(&mutex);
-
-
-        // printf(pthread_self() + "Consumed %d\n", eating);
         sleep(1);
     }
     return 0;
 }
 
-int main(int argc, char* argv[]) {
+int probA() {
     srand(time(NULL));
     pthread_mutex_init(&mutex, NULL);
 
-    pthread_t producers[5];
-    pthread_t consumers[5];
+    pthread_t producers[PRODUCER_AMOUNT];
+    pthread_t consumers[CONSUMER_AMOUNT];
 
     for (int i = 0; i < PRODUCER_AMOUNT; i++)
     {
@@ -88,7 +89,17 @@ int main(int argc, char* argv[]) {
     }
 
     sleep(10);
-    running = false;
-    pthread_mutex_destroy(&mutex);
+    runningA = false;
+
+    for (int i = 0; i < PRODUCER_AMOUNT; i++)
+    {
+        pthread_join(producers[i], NULL);
+    }
+
+    for (int i = 0; i < CONSUMER_AMOUNT; i++)
+    {
+        pthread_join(consumers[i], NULL);
+    }
+
     return 0;
 }
