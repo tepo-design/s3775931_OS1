@@ -22,7 +22,7 @@ pthread_mutex_t updateSeatsAvailable;
 sem_t customer;
 sem_t barber;
 pthread_t customerCreator;
-bool running = true;
+bool runningD = true;
 int seatsAvailable = NUMBER_SEATS;
 int queue[NUMBER_SEATS];
 int placeInQueue = 1;
@@ -33,7 +33,7 @@ float postOutputSleep = 1;
 
 void* cutHair(void* args)
 {
-    while (running)
+    while (runningD)
     {
         // wait for customer to become available
         sem_wait(&customer);
@@ -59,7 +59,7 @@ void* cutHair(void* args)
         sem_post(&barber);
 
 
-        // pthread_mutex_lock(&appointmentInProgress);
+        pthread_mutex_lock(&appointmentInProgress);
 
         std::stringstream cutting;
         cutting << "Barber " << pthread_self() << " is cutting a customer's hair.\n";
@@ -71,7 +71,7 @@ void* cutHair(void* args)
         int haircutTime = rand() % maxRandomNumber;
         sleep(haircutTime/sleepTimeDivisor);
 
-        // pthread_mutex_unlock(&appointmentInProgress);
+        pthread_mutex_unlock(&appointmentInProgress);
 
         std::stringstream complete;
         complete << "Haircut complete.\n";
@@ -79,14 +79,14 @@ void* cutHair(void* args)
         complete.str("");
         complete.clear();
 
-        // sleep(postOutputSleep);
+        sleep(postOutputSleep);
     }
     pthread_exit(NULL);
 }
 
 void* waitingRoom(void* args)
 {
-    while(running)
+    while(runningD)
     {   
         // lock available seats so conditional if statement is only accessible by one thread
         pthread_mutex_lock(&updateSeatsAvailable);
@@ -165,7 +165,7 @@ void removeCxFromQueue()
 // generate a continuous stream of customers 
 void* arrivingCustomers(void* args)
 {
-    while(running)
+    while(runningD)
     {
         std::stringstream cxLooking;
         cxLooking << "Customer " << noCustomersVisited << " is entering to look for availability. Precede to counter.\n";
@@ -217,7 +217,7 @@ int probD()
 
     // run program for 10 seconds
     sleep(10);
-    running = false;
+    runningD = false;
     pthread_join(customerCreator, NULL);
     for (int i = 0; i < BARBER_THREADS; i++)
     {

@@ -21,12 +21,12 @@ int bucket[BUCKET_SIZE];
 int count = 0;
 int maximumIndex = BUCKET_SIZE - 1;
 int minimumIndex = 0;
-bool running = true;
+bool runningA = true;
 
 
 void* producer(void* args) 
 {
-    while (running) 
+    while (runningA) 
     {
       // initiate lock so only one thread has access to the bucket  
       pthread_mutex_lock(&mutex);
@@ -57,7 +57,7 @@ void* producer(void* args)
 
 void* consumer(void* args) 
 {
-    while (running) 
+    while (runningA) 
     {
         pthread_mutex_lock(&mutex);
 
@@ -105,7 +105,7 @@ int probA() {
 
     // run the program for 10 seconds
     sleep(10);
-    running = false;
+    runningA = false;
 
     for (int i = 0; i < PRODUCER_AMOUNT; i++)
     {
